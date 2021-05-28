@@ -1,1 +1,1 @@
-# pdi-grupo-8
+Repositório com os códigos do grupo 8 da disciplina de Processamento Digital de Imagens
