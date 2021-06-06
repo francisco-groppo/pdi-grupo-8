@@ -63,11 +63,12 @@ img = cv2.imread('cameraman.tiff')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 # modificando o tamanho da imagem para uma matriz nxm
-# img = cv2.resize(img, (48, 48))
+img = cv2.resize(img, (101, 50))
 
 original = img
 
-borda = 2
+borda = 40
+
 
 if __name__ == "__main__":
     changed = nearest_neighbor_fill(img, borda)

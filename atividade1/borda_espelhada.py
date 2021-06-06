@@ -91,7 +91,7 @@ def visualize(original, changed):
     plt.show()
 
 
-img = cv2.imread('./atividade1/cameraman.tiff')
+img = cv2.imread('cameraman.tiff')
 img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 
