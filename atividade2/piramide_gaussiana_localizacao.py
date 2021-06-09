@@ -15,12 +15,18 @@ def downsample(img):
                        [1,  4,  6,  4, 1]])
     filtro = filtro/256.
 
+    #transformação da imagem em float
     img = img.astype(float)
     num_rows, num_cols = img.shape
+
+    #retorna a metade inteira da divisão por 2 das linhas e colunas
     half_num_rows = (num_rows+1)//2
     half_num_cols = (num_cols+1)//2
 
+    #aplica a convolução para suavização da imagem
     img_smooth = convolve(img, filtro, mode='same')
+
+    #cria um vetor de zeros, com a metade das linhas e colunas da matriz original
     img_down = np.zeros([half_num_rows,half_num_cols])
 
     for row in range(0, half_num_rows):
@@ -56,21 +62,10 @@ def diferenca_quadratica(img, obj):
             diff_region = (patch - obj)**2
             img_diff[row, col] = np.sum(diff_region)
 
+    #retorna a imagem contendo as diferenças
     return img_diff
 
-def draw_rectangle(img_g, center, size):
-    '''Desenha um quadrado em uma cópia do array img_g. center indica o centro do quadrado
-       e size o tamanho.'''
 
-    half_num_rows_obj = size[0]//2
-    half_num_cols_obj = size[1]//2
-
-    img_rectangle = img_g.copy()
-    pt1 = (center[1]-half_num_cols_obj, center[0]-half_num_rows_obj)
-    pt2 = (center[1]+half_num_cols_obj, center[0]+half_num_rows_obj)
-    cv2.rectangle(img_rectangle, pt1=pt1, pt2=pt2, color=255, thickness=3)
-
-    return img_rectangle
 
 def encontra_minimo(img):
     '''Encontra posição do valor mínimo de img'''
@@ -100,101 +95,109 @@ def num_niveis(img):
     #escalona a pirâmide até 3x3 no mínimo
     while tamanho > 2:
 
+        #pega o último valor e armazena na imagem
         img_down = piramide[-1]
+
+        #o tamanho vai sendo dividido por 2
         new_tamanho = (tamanho+1)//2
         tamanho =  new_tamanho
+        #chamamento da função que faz a suavização
         img_down = downsample(img_down)
+        #adição da imagem reduzida e suavizada no vetor pirâmide
         piramide.append(img_down)
 
         #retornar a pirâmide invertida
     return piramide[::-1]
 
+#função que retorna o menor valor existente entre a imagem e o objeto a ser localizado
 def retorna_menor_valor(img, imgobject):
     imgA = []
     menor_valorA = []
     indiceA = []
 
+    #aplicação da diferença quadrática entre a imagem e o objeto
     img_diferenca = diferenca_quadratica(img,imgobject)
 
+    #as variáveis recebem os valores mínimos existentes na imagem diferente
     menor_valor, indice = encontra_minimo(img_diferenca)
 
-    print('Menor diferença: {}'.format(menor_valor))
-    print('Posição: {}'.format(indice))
+    #adição dos valores encontrados em vetores
     imgA.append(img)
     menor_valorA.append(menor_valor)
     indiceA.append(indice)
 
+    #retorna da imagem e dos valores mínimos
     return imgA, menor_valorA,indiceA
 
+#função que retorna o índice da imagem onde foi localizado o bojeto
+def menor_valor(valor):
+    pos = -1
+    for i in range(len(menor_valorAB)-1,-1,-1):
+        if menor_valorAB[i] == valor:
+            pos = i
 
+    return pos
 
 
 if __name__ == "__main__":
 
-    img = cv2.imread('imagem_global.tiff')
+    # img = cv2.imread('imagem_global.tiff')
+    # img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # img = img.astype(float)
+
+    img = cv2.imread('flower_grayscale1.tiff')
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     img = img.astype(float)
 
-    imgobject = cv2.imread('gato.tiff')
+    # imgobject = cv2.imread('gato.tiff')
+    # imgobject = cv2.cvtColor(imgobject, cv2.COLOR_BGR2GRAY)
+    # imgobject = imgobject.astype(float)
+
+    imgobject = cv2.imread('planta_pequena.tif')
     imgobject = cv2.cvtColor(imgobject, cv2.COLOR_BGR2GRAY)
     imgobject = imgobject.astype(float)
 
 
-
-    #esta parte debaixo seta o retângulo
-    #img_square = draw_rectangle(img_g, indice, img_o.shape)
-    #plt.imshow(img_square, 'gray')
-
+    #criação da pirâmide
     piramides = num_niveis(img)
 
 
     imgAB=[]
     menor_valorAB=[]
     indiceAB=[]
-    vet = []
-    num_rows_gato, num_cols_gato = imgobject.shape
-    vet.append(num_rows_gato)
-    vet.append(num_cols_gato)
+
+
+    #varre as imagens na pirâmide
     for pir in range (len(piramides)):
-        # num_rows, num_cols = piramides[pir].shape
-        #print(num_rows, num_cols)
-        #plt.figure(figsize=[10,10])
-        #plt.figure(figsize=[num_rows/40,num_cols/60])
-        #plt.imshow(piramides[pir], 'gray')
 
         imgA, menor_valorA,indice = retorna_menor_valor(piramides[pir], imgobject)
         imgAB.append(imgA)
         menor_valorAB.append(menor_valorA)
         indiceAB.append(indice)
 
-
-        # print(imagem_com_menor_valor)
-        # plt.imshow(imagem_com_menor_valor, 'gray')
-    valor = np.min(menor_valorAB)
-    pos = -1
-    for i in range(len(menor_valorAB)-1,-1,-1):
-        if menor_valorAB[i] == valor:
-            pos = i
-    print(pos)
-
-    #print('imgobject.shape: {}'.format(imgobject.shape))
-    #print('piramides[pos]: {}'.format(piramides[pos].shape))
-    #plt.imshow(piramides[pos], 'gray')
+        plt.imshow(piramides[pir], 'gray')
+        plt.figure()
 
 
-    print('Menor valorAB: {}'.format(menor_valorAB[pos]))
-    print('Menor indice: {}'.format(indiceAB[pos]))
+    #a variável pos recebe o menor valor do vetor de valores
+    pos = menor_valor(np.min(menor_valorAB))
 
 
+    #criação da função que gera um retângulo na imagem que contém o objeto
     half_num_rows_obj = imgobject.shape[0]//2
     half_num_cols_obj = imgobject.shape[1]//2
     centerA = indiceAB[pos][0][0]
     centerB = indiceAB[pos][0][1]
 
+    #imagem retângulo recebe a cópia da pirâmide onde encontrou o objeto localizado
     img_rectangle = piramides[pos].copy()
+
+    #criação do retângulo utilizando o cv2.rectangle do opencv
     pt1 = (centerB-half_num_cols_obj, centerA -half_num_rows_obj)
     pt2 = (centerB+half_num_cols_obj, centerA +half_num_rows_obj)
     cv2.rectangle(img_rectangle, pt1=pt1, pt2=pt2, color=255, thickness=3)
-    plt.title("imagem certa")
+
+    #Plotagem do objeto localizado na pirâmide de imagens
+    plt.title("imagem da pirâmide "+ str(pos) + ' / '+ str(len(piramides)-1) +', índice: '+ str(indiceAB[pos]) )
     plt.imshow(img_rectangle, 'gray')
     plt.figure()
