@@ -129,7 +129,7 @@ def retorna_menor_valor(img, imgobject):
     #retorna da imagem e dos valores mínimos
     return imgA, menor_valorA,indiceA
 
-#função que retorna o índice da imagem onde foi localizado o bojeto
+#função que retorna o índice da imagem onde foi localizado o objeto
 def menor_valor(valor):
     pos = -1
     for i in range(len(menor_valorAB)-1,-1,-1):
